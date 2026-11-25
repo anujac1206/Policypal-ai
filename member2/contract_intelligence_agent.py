@@ -65,15 +65,10 @@ class GeminiClient:
         pip install google-genai
         export GEMINI_API_KEY="your-key-here"   # from aistudio.google.com
 
-    Free-tier-friendly models (as of mid-2026): "gemini-3.1-flash-lite" or
-    "gemini-flash-lite-latest". Avoid "gemini-2.5-pro" on the free tier —
-    it's capped very low (a handful of requests/day).
-
-    Note: "gemini-2.5-flash" and "gemini-flash-latest" (resolves to
-    gemini-3.5-flash) may hit strict free-tier quotas for new API keys.
+    Uses the supported Gemini 2.5 Flash-Lite model by default.
     """
 
-    def __init__(self, model: str = "gemini-3.1-flash-lite"):
+    def __init__(self, model: str = "gemini-2.5-flash-lite"):
         from google import genai
         import os
 
