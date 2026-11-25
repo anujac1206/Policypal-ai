@@ -76,7 +76,7 @@ def build_client():
             )
         # Uses the new `google-genai` SDK — install with: pip install google-genai
         # (the old `google-generativeai` package is deprecated and no longer works)
-        return GeminiClient(model="gemini-2.5-flash-lite")
+        return GeminiClient(model="gemini-3.5-flash-lite")
 
     else:
         sys.exit(f"Unknown PROVIDER: {PROVIDER}")

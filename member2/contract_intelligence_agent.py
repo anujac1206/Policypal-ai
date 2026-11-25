@@ -65,10 +65,10 @@ class GeminiClient:
         pip install google-genai
         export GEMINI_API_KEY="your-key-here"   # from aistudio.google.com
 
-    Uses the supported Gemini 2.5 Flash-Lite model by default.
+    Uses the Gemini 3.5 Flash-Lite model by default.
     """
 
-    def __init__(self, model: str = "gemini-2.5-flash-lite"):
+    def __init__(self, model: str = "gemini-3.5-flash-lite"):
         from google import genai
         import os
 
