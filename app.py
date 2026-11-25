@@ -2,7 +2,7 @@ import os
 
 import streamlit as st
 
-for secret_name in ("GEMINI_API_KEY", "GOOGLE_API_KEY"):
+for secret_name in ("OPENROUTER_API_KEY",):
     if secret_name in st.secrets:
         os.environ[secret_name] = st.secrets[secret_name]
 

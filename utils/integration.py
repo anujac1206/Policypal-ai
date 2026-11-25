@@ -2,7 +2,7 @@ import os
 
 from member2.contract_intelligence_agent import (
     ContractIntelligenceAgent,
-    GeminiClient,
+    OpenRouterClient,
 )
 from member3.agent import analyze_contract
 from rag.pdf_loader import extract_text_from_pdf
@@ -120,7 +120,7 @@ def analyze_document(file_path: str, question: str, analysis_type: str = "Full A
     if not contract_text.strip():
         raise ValueError("No readable text found in the uploaded document.")
 
-    agent1 = ContractIntelligenceAgent(GeminiClient())
+    agent1 = ContractIntelligenceAgent(OpenRouterClient())
     structured_contract = agent1.analyze(contract_text)
 
     member3_input = convert_to_member3_format(structured_contract)

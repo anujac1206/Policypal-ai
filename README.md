@@ -62,6 +62,22 @@ pip install -r requirements.txt
 
 ---
 
+## Configure OpenRouter
+
+Create an API key at [OpenRouter](https://openrouter.ai/keys). For local
+development, create `.streamlit/secrets.toml` and add:
+
+```toml
+OPENROUTER_API_KEY = "your-openrouter-api-key"
+```
+
+In Streamlit Community Cloud, add the same TOML entry under **App settings →
+Secrets**. Do not commit the secrets file or put the key in application code.
+The app uses OpenRouter's `openrouter/free` model router, which may have
+request limits and may select different free models over time.
+
+---
+
 ## Running the Application
 
 Start the Streamlit application.
