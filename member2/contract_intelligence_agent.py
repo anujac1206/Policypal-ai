@@ -32,42 +32,6 @@ class LLMClient(Protocol):
         ...
 
 
-class OpenRouterClient:
-    """OpenAI-compatible client for OpenRouter's free-model router."""
-
-    def __init__(self, model: str = "openrouter/free", max_tokens: int = 4096):
-        import os
-        from openai import OpenAI
-
-        api_key = os.getenv("OPENROUTER_API_KEY")
-        if not api_key:
-            raise RuntimeError("OPENROUTER_API_KEY environment variable is not set.")
-
-        self.client = OpenAI(
-            api_key=api_key,
-            base_url="https://openrouter.ai/api/v1",
-        )
-        self.model = model
-        self.max_tokens = max_tokens
-
-    def complete(self, system: str, messages: list[dict]) -> str:
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "system", "content": system}, *messages],
-            temperature=0,
-            max_tokens=self.max_tokens,
-            response_format={"type": "json_object"},
-        )
-
-        if not response.choices:
-            raise RuntimeError("OpenRouter returned no completion choices.")
-
-        content = response.choices[0].message.content
-        if not content or not content.strip():
-            raise RuntimeError("OpenRouter returned an empty completion.")
-        return content
-
-
 class AnthropicClient:
     """Reference implementation using the Anthropic API."""
 

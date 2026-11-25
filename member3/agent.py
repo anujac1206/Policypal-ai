@@ -1,11 +1,12 @@
 """
 Explanation & Risk Agent - main module.
-Combines rule-based risk scoring with LLM-generated insights using OpenRouter.
+Combines rule-based risk scoring with LLM-generated insights using Google Gemini.
 """
 
 import json
+import os
 
-from member2.contract_intelligence_agent import OpenRouterClient
+from member2.contract_intelligence_agent import GeminiClient
 
 from .schemas import ClausesInput, ContractAnalysisInput, ContractAnalysisOutput, RiskFinding
 from .risk import calculate_risk
@@ -17,7 +18,7 @@ def analyze_contract(
     include_llm: bool = True,
 ) -> ContractAnalysisOutput:
     """
-    Analyze a contract for risks and generate explanations using OpenRouter.
+    Analyze a contract for risks and generate explanations using Google Gemini.
     
     Args:
         clauses: ClausesInput object or dict with parsed clauses
@@ -49,7 +50,15 @@ def analyze_contract(
             answer="Clause extraction complete. Review the extracted clauses on the dashboard.",
         )
 
-    # Step 3: Call OpenRouter (same client/model as Member 2)
+    # Step 3: Call Gemini API (same client/model as Member 2)
+    api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        raise ValueError(
+            "GEMINI_API_KEY environment variable not set.\n"
+            "Get your free API key at: https://aistudio.google.com/apikey\n"
+            "Set GEMINI_API_KEY in your Streamlit secrets."
+        )
+
     system_prompt = """You are an expert contract analyst. You will be provided with:
 1. Parsed contract clauses
 2. A risk assessment
@@ -79,7 +88,7 @@ User Question: {question}
 
 Respond ONLY as valid JSON with keys "summary" and "answer". No markdown, no code blocks, no other text."""
 
-    llm_client = OpenRouterClient()
+    llm_client = GeminiClient()
     response_text = llm_client.complete(
         system_prompt,
         [{"role": "user", "content": user_message}],

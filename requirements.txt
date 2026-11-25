@@ -3,10 +3,7 @@ streamlit
 python-dotenv
 pydantic>=2.0.0
 
-# OpenRouter API client
-openai
-
-# Google Gemini clients used by legacy utilities
+# Google Gemini clients
 google-genai
 google-generativeai>=0.3.0
 

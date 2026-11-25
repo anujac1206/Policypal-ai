@@ -62,19 +62,19 @@ pip install -r requirements.txt
 
 ---
 
-## Configure OpenRouter
+## Configure Gemini
 
-Create an API key at [OpenRouter](https://openrouter.ai/keys). For local
+Create an API key at [Google AI Studio](https://aistudio.google.com/apikey). For local
 development, create `.streamlit/secrets.toml` and add:
 
 ```toml
-OPENROUTER_API_KEY = "your-openrouter-api-key"
+GEMINI_API_KEY = "your-gemini-api-key"
 ```
 
 In Streamlit Community Cloud, add the same TOML entry under **App settings →
 Secrets**. Do not commit the secrets file or put the key in application code.
-The app uses OpenRouter's `openrouter/free` model router, which may have
-request limits and may select different free models over time.
+The app uses the Google Gemini API, so configure this secret before analyzing
+contracts.
 
 ---
 
