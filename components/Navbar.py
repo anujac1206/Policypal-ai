@@ -72,8 +72,8 @@ def render_navbar():
     """, unsafe_allow_html=True)
 
     # 2. Use Streamlit columns safely, letting CSS collapse the space between them
-    col_brand, spacer1, col_link1, col_link2, col_link3, spacer2 = st.columns(
-        [4, 2, 1, 1.5, 1, 4]
+    col_brand, spacer1, col_l1, col_l2, col_l3, col_l4, col_l5, col_l6, spacer2 = st.columns(
+        [4, 1, 1, 1.4, 1.4, 1.5, 1.5, 1, 2]
     )
 
     with col_brand:
@@ -84,11 +84,15 @@ def render_navbar():
         </div>
         """, unsafe_allow_html=True)
 
-    with col_link1:
-        st.page_link("app.py", label="Home", icon=None)
-
-    with col_link2:
-        st.page_link("pages/Dashboard.py", label="Dashboard", icon=None)
-
-    with col_link3:
-        st.page_link("pages/About.py", label="About", icon=None)
+    with col_l1:
+        st.page_link("app.py",                     label="Home",          icon=None)
+    with col_l2:
+        st.page_link("pages/Dashboard.py",          label="Dashboard",     icon=None)
+    with col_l3:
+        st.page_link("pages/RiskAnalysis.py",       label="Risk Analysis", icon=None)
+    with col_l4:
+        st.page_link("pages/ClauseExplorer.py",     label="Clauses",       icon=None)
+    with col_l5:
+        st.page_link("pages/Obligations.py",        label="Obligations",   icon=None)
+    with col_l6:
+        st.page_link("pages/About.py",              label="About",         icon=None)

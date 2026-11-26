@@ -1,6 +1,8 @@
 # Streamlit application
 streamlit
 python-dotenv
+plotly
+pandas
 pydantic>=2.0.0
 
 # Google Gemini clients

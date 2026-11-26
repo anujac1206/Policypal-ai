@@ -64,17 +64,17 @@ pip install -r requirements.txt
 
 ## Configure Gemini
 
-Create an API key at [Google AI Studio](https://aistudio.google.com/apikey). For local
-development, create `.streamlit/secrets.toml` and add:
+Create an API key at [Google AI Studio](https://aistudio.google.com/apikey). For
+local development, create a `.env` file in the project root (next to `app.py`)
+and add:
 
-```toml
-GEMINI_API_KEY = "your-gemini-api-key"
+```dotenv
+GEMINI_API_KEY=your-gemini-api-key
 ```
 
-In Streamlit Community Cloud, add the same TOML entry under **App settings →
-Secrets**. Do not commit the secrets file or put the key in application code.
-The app uses the Google Gemini API, so configure this secret before analyzing
-contracts.
+The app loads `.env` automatically. Keep the file private; `.env` is ignored by
+Git. For Streamlit Community Cloud, add `GEMINI_API_KEY` under **App settings →
+Secrets** instead. The app supports both sources.
 
 ---
 

@@ -1,10 +1,17 @@
 import os
 
+from dotenv import load_dotenv
 import streamlit as st
+from streamlit.errors import StreamlitSecretNotFoundError
+
+load_dotenv()
 
 for secret_name in ("GEMINI_API_KEY", "GOOGLE_API_KEY"):
-    if secret_name in st.secrets:
-        os.environ[secret_name] = st.secrets[secret_name]
+    try:
+        secret_value = st.secrets[secret_name]
+    except (KeyError, StreamlitSecretNotFoundError):
+        continue
+    os.environ[secret_name] = secret_value
 
 from components.Navbar import render_navbar
 from components.Hero import render_hero

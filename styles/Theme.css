@@ -3,18 +3,65 @@
 }
 
 :root{
-    --bg-primary:#0a0a0a;
-    --bg-secondary:#141414;
-    --card-bg:#1a1a1a;
+    --bg-primary:#07070f;
+    --bg-secondary:#0d0d1a;
+    --card-bg:#111125;
 
-    --text-primary:#ffffff;
-    --text-secondary:#b3b3b3;
+    --text-primary:#e0e0ff;
+    --text-secondary:#8899bb;
 
-    --border:#2a2a2a;
+    --accent:#4f8ef7;
+    --accent2:#2dd4a8;
+
+    --border:#1e2440;
 }
 
 .main {
     background-color: var(--bg-primary);
+}
+
+/* ── Streamlit metric tweaks ── */
+[data-testid="stMetricValue"]  { color: #e0e0ff !important; font-weight: 700 !important; }
+[data-testid="stMetricLabel"]  { color: #6677aa !important; font-size: 0.75rem !important; }
+[data-testid="stMetricDelta"]  { font-size: 0.8rem !important; }
+
+/* ── Tab styling ── */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 0.5rem;
+    border-bottom: 1px solid #1e2440 !important;
+    background: transparent !important;
+}
+.stTabs [data-baseweb="tab"] {
+    padding: 0.5rem 1.2rem !important;
+    border-radius: 8px 8px 0 0 !important;
+    background: transparent !important;
+    color: #6677aa !important;
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    border: none !important;
+    transition: color 0.15s;
+}
+.stTabs [data-baseweb="tab"]:hover { color: #c8d4f0 !important; }
+.stTabs [aria-selected="true"] {
+    color: #4f8ef7 !important;
+    background: rgba(79,142,247,0.08) !important;
+    border-bottom: 2px solid #4f8ef7 !important;
+}
+
+/* ── Expander ── */
+details summary {
+    color: #8899bb !important;
+    font-size: 0.88rem !important;
+}
+details[open] summary { color: #c8d4f0 !important; }
+
+/* ── Selectbox / Radio ── */
+div[data-baseweb="select"] > div { background: #111125 !important; border-color: #1e2440 !important; }
+
+/* ── Info / Success / Warning / Error boxes — subtler ── */
+div[data-testid="stAlert"] {
+    border-radius: 10px !important;
+    font-size: 0.88rem !important;
 }
 
 /* Navbar */

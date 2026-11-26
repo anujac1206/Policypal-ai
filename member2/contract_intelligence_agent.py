@@ -97,6 +97,7 @@ class GeminiClient:
 
     def complete(self, system: str, messages: list[dict]) -> str:
         from google.genai import types, errors
+        import random
         import time
 
         contents = []
@@ -107,6 +108,7 @@ class GeminiClient:
             )
 
         for attempt in range(5):
+            should_retry = False
             try:
                 response = self.client.models.generate_content(
                     model=self.model_name,
@@ -124,17 +126,21 @@ class GeminiClient:
                     return text
 
                 print(f"Gemini returned empty response... retry {attempt + 1}/5")
-                time.sleep(3)
+                should_retry = True
 
             except errors.ServerError:
                 print(f"Gemini is busy... retry {attempt + 1}/5")
-                time.sleep(5)
+                should_retry = True
             except errors.ClientError as e:
                 if getattr(e, "code", None) == 429:
                     print(f"Gemini rate limited... retry {attempt + 1}/5")
-                    time.sleep(15)
+                    should_retry = True
                 else:
                     raise
+
+            if should_retry and attempt < 4:
+                delay = min(2 ** (attempt + 1), 30) + random.uniform(0, 1)
+                time.sleep(delay)
 
         raise RuntimeError("Gemini service unavailable after 5 retries.")
 

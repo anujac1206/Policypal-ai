@@ -56,7 +56,7 @@ def analyze_contract(
         raise ValueError(
             "GEMINI_API_KEY environment variable not set.\n"
             "Get your free API key at: https://aistudio.google.com/apikey\n"
-            "Set GEMINI_API_KEY in your Streamlit secrets."
+            "Set GEMINI_API_KEY in your .env file or Streamlit secrets."
         )
 
     system_prompt = """You are an expert contract analyst. You will be provided with:
