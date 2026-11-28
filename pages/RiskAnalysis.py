@@ -1,74 +1,36 @@
 """
 Risk Analysis — dedicated page (re-uses Dashboard session state).
 """
+import os
 import streamlit as st
 import plotly.graph_objects as go
-import plotly.express as px
-import pandas as pd
 
 from components.Navbar import render_navbar
 from utils.integration import get_standard_clause_status
+from utils.icons import icon
+from utils.export import generate_markdown_report, generate_json_export
 
 st.set_page_config(
     page_title="Risk Analysis — PolicyPal AI",
     layout="wide",
-    page_icon="🚨",
+    page_icon="assets/Logo.png",
 )
 
-st.markdown("""
-<style>
-[data-testid="stSidebar"]      { display: none; }
-[data-testid="collapsedControl"]{ display: none; }
-.block-container { padding-top:0.5rem; padding-left:2rem; padding-right:2rem; }
-iframe[title="streamlit.components.v1.html"] { margin-bottom:-8px; }
-
-.page-header {
-    background: linear-gradient(135deg, #1a0a0a 0%, #2d1010 60%, #1a0a1a 100%);
-    border: 1px solid #4a2020;
-    border-radius: 16px;
-    padding: 1.8rem 2rem;
-    margin-bottom: 1.5rem;
-}
-.page-header h1 { color:#ffcccc; font-size:1.9rem; font-weight:700; margin:0 0 0.2rem 0; }
-.page-header .sub { color:#997788; font-size:0.9rem; }
-
-.section-title {
-    font-size:1.05rem; font-weight:600; color:#c8d4f0;
-    border-left:3px solid #e05c5c; padding-left:0.75rem;
-    margin:1.5rem 0 0.8rem 0;
-}
-.risk-card {
-    background:#1a0d0d; border:1px solid #3d1a1a;
-    border-radius:12px; padding:1rem 1.2rem; margin-bottom:0.7rem;
-}
-.risk-card.high   { border-left:4px solid #e05c5c; }
-.risk-card.medium { border-left:4px solid #f5a623; }
-.risk-card.low    { border-left:4px solid #2dd4a8; }
-.risk-cat  { font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; }
-.risk-desc { color:#c8bbd0; font-size:0.9rem; margin-top:0.3rem; line-height:1.6; }
-.sev-badge {
-    display:inline-block; font-size:0.72rem; padding:0.15rem 0.6rem;
-    border-radius:20px; font-weight:600;
-}
-.sev-High   { background:#3d1a1a; color:#ff9090; }
-.sev-Medium { background:#3a2d10; color:#ffc87a; }
-.sev-Low    { background:#0d2d1a; color:#6de0a0; }
-
-.missing-card {
-    background:#1e1510; border:1px solid #4a3010; border-radius:10px;
-    padding:0.8rem 1rem; margin-bottom:0.5rem;
-}
-</style>
-""", unsafe_allow_html=True)
+PLOTLY_LAYOUT = dict(
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    font=dict(color="#b3b3b3", size=11),
+    margin=dict(t=10, b=10, l=10, r=10),
+)
 
 render_navbar()
 
 if "analysis" not in st.session_state:
-    st.markdown("""
-    <div style="text-align:center;padding:4rem;">
-      <div style="font-size:3rem;">🚨</div>
-      <h2 style="color:#997788;">No Contract Analysed Yet</h2>
-      <p style="color:#664455;">Upload a contract on the Home page first.</p>
+    st.markdown(f"""
+    <div style="text-align:center; padding:5rem 2rem;">
+      {icon("shield_alert", 48, "#475569")}
+      <h3 style="color:#94a3b8; margin-top:1rem; font-weight:600;">No contract analysed yet</h3>
+      <p style="color:#64748b; font-size:0.9rem;">Upload a contract on the Home page first.</p>
     </div>""", unsafe_allow_html=True)
     st.stop()
 
@@ -78,136 +40,184 @@ metadata            = st.session_state.get("analysis_metadata", {})
 standard_clauses    = get_standard_clause_status(structured_contract)
 critical_risks      = [r for r in analysis.risks if r.severity == "High"]
 
-st.markdown(f"""
-<div class="page-header">
-  <h1>🚨 Risk Analysis</h1>
-  <div class="sub">
-    📄 <strong style="color:#ffbbbb">{metadata.get('filename','—')}</strong>
-    &nbsp;·&nbsp; Risk Score: <strong style="color:#ff9090">{analysis.risk_score}/100</strong>
-    &nbsp;·&nbsp; Level: <strong style="color:#ff9090">{analysis.risk_level}</strong>
-  </div>
-</div>""", unsafe_allow_html=True)
+base_name = os.path.splitext(metadata.get('filename', 'contract'))[0] or "contract"
+md_report = generate_markdown_report(structured_contract, analysis, metadata)
+json_report = generate_json_export(structured_contract, analysis, metadata)
 
-# ── Top metrics row ───────────────────────────────────────────────────────────
-c1, c2, c3, c4 = st.columns(4)
+col_head, col_btn1, col_btn2 = st.columns([3, 1, 1])
+
+with col_head:
+    st.markdown(f"""
+    <div class="page-header" style="margin-bottom:0;">
+      <h1>
+        {icon("shield_alert", 26, "#f87171")}
+        Risk Analysis & Compliance
+      </h1>
+      <div class="sub">
+        <strong>{metadata.get('filename','—')}</strong> &nbsp;·&nbsp;
+        Risk Score: <strong style="color:#f87171">{analysis.risk_score}/100</strong> &nbsp;·&nbsp; Level: <strong>{analysis.risk_level}</strong>
+      </div>
+    </div>""", unsafe_allow_html=True)
+
+with col_btn1:
+    st.markdown("<div style='height:22px;'></div>", unsafe_allow_html=True)
+    st.download_button(
+        label="Download Report (.md)",
+        data=md_report,
+        file_name=f"{base_name}_risk_report.md",
+        mime="text/markdown",
+        width="stretch",
+    )
+
+with col_btn2:
+    st.markdown("<div style='height:22px;'></div>", unsafe_allow_html=True)
+    st.download_button(
+        label="Export Data (.json)",
+        data=json_report,
+        file_name=f"{base_name}_risk_data.json",
+        mime="application/json",
+        width="stretch",
+    )
+
+st.markdown("<div style='height:14px;'></div>", unsafe_allow_html=True)
+
+# ── KPI row with crisp box cards ──────────────────────────────────────────────
 severity_counts = {}
 for r in analysis.risks:
     severity_counts[r.severity] = severity_counts.get(r.severity, 0) + 1
 
+c1, c2, c3, c4 = st.columns(4)
 with c1:
-    st.metric("🔴 High Risks",   severity_counts.get("High",   0))
+    st.markdown(f"""
+    <div class="kpi-card">
+      <div class="kpi-label">{icon("alert_circle", 16, "#f87171")} High Risks</div>
+      <div class="kpi-value" style="color:#f87171;">{severity_counts.get("High", 0)}</div>
+      <div class="kpi-sub">Critical legal red flags</div>
+    </div>""", unsafe_allow_html=True)
 with c2:
-    st.metric("🟡 Medium Risks", severity_counts.get("Medium", 0))
+    st.markdown(f"""
+    <div class="kpi-card">
+      <div class="kpi-label">{icon("alert_triangle", 16, "#fbbf24")} Medium Risks</div>
+      <div class="kpi-value" style="color:#fbbf24;">{severity_counts.get("Medium", 0)}</div>
+      <div class="kpi-sub">Moderate risk clauses</div>
+    </div>""", unsafe_allow_html=True)
 with c3:
-    st.metric("🟢 Low Risks",    severity_counts.get("Low",    0))
+    st.markdown(f"""
+    <div class="kpi-card">
+      <div class="kpi-label">{icon("info", 16, "#4ade80")} Low Risks</div>
+      <div class="kpi-value" style="color:#4ade80;">{severity_counts.get("Low", 0)}</div>
+      <div class="kpi-sub">Minor observations</div>
+    </div>""", unsafe_allow_html=True)
 with c4:
     missing_count = sum(1 for c in standard_clauses if not c["found"])
-    st.metric("❌ Missing Clauses", missing_count)
+    missing_color = "#fbbf24" if missing_count else "#4ade80"
+    st.markdown(f"""
+    <div class="kpi-card">
+      <div class="kpi-label">{icon("minus_circle", 16, missing_color)} Missing Clauses</div>
+      <div class="kpi-value" style="color:{missing_color};">{missing_count}</div>
+      <div class="kpi-sub">Unaddressed standard terms</div>
+    </div>""", unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 left_col, right_col = st.columns([3, 2])
 
 with right_col:
-    # Gauge
-    st.markdown('<div class="section-title">Risk Score Gauge</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="section-title">{icon("speed", 16, "#8fa0b5")} Risk Score Gauge</div>', unsafe_allow_html=True)
+    score = analysis.risk_score
+    needle = "#f87171" if score >= 60 else ("#fbbf24" if score >= 30 else "#4ade80")
     gauge = go.Figure(go.Indicator(
-        mode="gauge+number+delta",
-        value=analysis.risk_score,
-        delta={"reference": 50, "increasing": {"color": "#e05c5c"}, "decreasing": {"color": "#2dd4a8"}},
-        title={"text": "Overall Score", "font": {"color": "#997788", "size": 13}},
-        number={"font": {"color": "#ffcccc", "size": 48}},
+        mode="gauge+number",
+        value=score,
+        title={"text": "Risk Score", "font": {"color": "#8fa0b5", "size": 12}},
+        number={"font": {"color": needle, "size": 42}},
         gauge={
-            "axis": {"range": [0, 100], "tickcolor": "#664455", "tickfont": {"color": "#664455"}},
-            "bar": {"color": "#e05c5c" if analysis.risk_score >= 60 else ("#f5a623" if analysis.risk_score >= 30 else "#2dd4a8")},
+            "axis": {"range": [0, 100], "tickcolor": "#283248", "tickfont": {"color": "#8fa0b5"}},
+            "bar":  {"color": needle},
             "steps": [
-                {"range": [0, 30],  "color": "#0d2d1a"},
-                {"range": [30, 60], "color": "#3a2d10"},
-                {"range": [60, 100],"color": "#3d1a1a"},
+                {"range": [0, 30],  "color": "#141722"},
+                {"range": [30, 60], "color": "#1a1f2e"},
+                {"range": [60, 100],"color": "#26191f"},
             ],
-            "bgcolor": "rgba(0,0,0,0)",
-            "bordercolor": "#3d1a1a",
+            "threshold": {"line": {"color": needle, "width": 2}, "thickness": 0.75, "value": score},
+            "bgcolor":     "rgba(0,0,0,0)",
+            "bordercolor": "#283248",
         },
     ))
     gauge.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)", height=280,
-        margin=dict(t=20, b=10, l=20, r=20),
-        font=dict(color="#997788"),
+        **{**PLOTLY_LAYOUT, "height": 260, "margin": dict(t=20, b=10, l=20, r=20)}
     )
-    st.plotly_chart(gauge, use_container_width=True)
+    st.plotly_chart(gauge, width="stretch")
 
-    # Severity distribution pie
     if severity_counts:
-        st.markdown('<div class="section-title">Severity Breakdown</div>', unsafe_allow_html=True)
-        pie = go.Figure(go.Pie(
-            labels=list(severity_counts.keys()),
-            values=list(severity_counts.values()),
-            hole=0.5,
-            marker_colors=[{"High": "#e05c5c", "Medium": "#f5a623", "Low": "#2dd4a8"}.get(k, "#4f8ef7") for k in severity_counts.keys()],
-            textinfo="label+value",
-            textfont=dict(color="#c8d4f0"),
-        ))
-        pie.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)", height=240,
-            margin=dict(t=10, b=10, l=10, r=10),
-            showlegend=False, font=dict(color="#997788"),
-        )
-        st.plotly_chart(pie, use_container_width=True)
-
-    # Missing clauses bar
-    if any(True for c in standard_clauses for _ in [None]):
-        labels = [c["label"] for c in standard_clauses]
-        found  = [1 if c["found"] else 0 for c in standard_clauses]
-        st.markdown('<div class="section-title">Clause Coverage</div>', unsafe_allow_html=True)
-        bar = go.Figure(go.Bar(
-            x=labels,
-            y=found,
-            marker_color=["#2dd4a8" if f else "#e05c5c" for f in found],
-            text=["✅" if f else "❌" for f in found],
+        st.markdown(f'<div class="section-title">{icon("alert_triangle", 16, "#8fa0b5")} Severity Breakdown</div>', unsafe_allow_html=True)
+        sev_map = {"High": "#f87171", "Medium": "#fbbf24", "Low": "#4ade80"}
+        sev_fig = go.Figure(go.Bar(
+            x=list(severity_counts.keys()),
+            y=list(severity_counts.values()),
+            marker_color=[sev_map.get(k, "#475569") for k in severity_counts.keys()],
+            text=list(severity_counts.values()),
             textposition="outside",
+            textfont=dict(color="#8fa0b5"),
         ))
-        bar.update_layout(
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            height=200,
-            margin=dict(t=10, b=5, l=5, r=5),
-            xaxis=dict(tickfont=dict(color="#997788"), showgrid=False),
+        sev_fig.update_layout(
+            **PLOTLY_LAYOUT, height=180,
+            xaxis=dict(tickfont=dict(color="#8fa0b5"), showgrid=False),
             yaxis=dict(visible=False),
-            showlegend=False,
         )
-        st.plotly_chart(bar, use_container_width=True)
+        st.plotly_chart(sev_fig, width="stretch")
+
+    st.markdown(f'<div class="section-title">{icon("shield_check", 16, "#8fa0b5")} Standard Clause Checklist</div>', unsafe_allow_html=True)
+    labels = [c["label"] for c in standard_clauses]
+    found  = [1 if c["found"] else 0 for c in standard_clauses]
+    cov_fig = go.Figure(go.Bar(
+        x=labels,
+        y=found,
+        marker_color=["#2dd4a8" if f else "#f87171" for f in found],
+        text=["Found" if f else "Missing" for f in found],
+        textposition="outside",
+        textfont=dict(color="#8fa0b5", size=11),
+    ))
+    cov_fig.update_layout(
+        **PLOTLY_LAYOUT, height=190,
+        xaxis=dict(tickfont=dict(color="#8fa0b5"), showgrid=False),
+        yaxis=dict(visible=False),
+    )
+    st.plotly_chart(cov_fig, width="stretch")
 
 with left_col:
-    # Risks list
-    st.markdown('<div class="section-title">Identified Risks</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="section-title">{icon("shield_alert", 16, "#8fa0b5")} Identified Contract Risks ({len(analysis.risks)})</div>', unsafe_allow_html=True)
     if analysis.risks:
-        for risk in sorted(analysis.risks, key=lambda r: {"High": 0, "Medium": 1, "Low": 2}.get(r.severity, 3)):
+        for risk in sorted(analysis.risks,
+                           key=lambda r: {"High": 0, "Medium": 1, "Low": 2}.get(r.severity, 3)):
             sev = risk.severity
-            cat_color = "#ff9090" if sev == "High" else ("#ffc87a" if sev == "Medium" else "#6de0a0")
+            border_cls = f"risk-border-{sev.lower()}"
+            badge_cls = f"badge-{sev.lower()}"
+            icon_col = "#f87171" if sev == "High" else ("#fbbf24" if sev == "Medium" else "#4ade80")
             st.markdown(f"""
-            <div class="risk-card {sev.lower()}">
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div class="risk-cat" style="color:{cat_color};">{risk.category}</div>
-                <span class="sev-badge sev-{sev}">{sev}</span>
+            <div class="risk-card {border_cls}">
+              <div class="rc-header">
+                <span class="rc-cat">{icon("alert_circle", 15, icon_col)} {risk.category}</span>
+                <span class="{badge_cls}">{sev}</span>
               </div>
-              <div class="risk-desc">{risk.description}</div>
+              <div class="rc-desc">{risk.description}</div>
             </div>""", unsafe_allow_html=True)
     else:
-        st.markdown("""
-        <div style="text-align:center;padding:3rem 1rem;color:#2dd4a8;">
-          <div style="font-size:2.5rem;">✅</div>
-          <div style="margin-top:0.5rem;font-size:1rem;">No risks identified — contract looks clean</div>
+        st.markdown(f"""
+        <div style="text-align:center; padding:2.5rem 1rem;">
+          {icon("shield_check", 32, "#2dd4a8")}
+          <p style="color:#8fa0b5; font-size:0.9rem; margin-top:0.5rem;">No significant risks identified in this agreement.</p>
         </div>""", unsafe_allow_html=True)
 
-    # Missing clauses
     missing = [c for c in standard_clauses if not c["found"]]
     if missing:
-        st.markdown('<div class="section-title">⚠️ Missing Standard Clauses</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="section-title">{icon("minus_circle", 16, "#fbbf24")} Missing Standard Protections ({len(missing)})</div>', unsafe_allow_html=True)
         for m in missing:
             st.markdown(f"""
-            <div class="missing-card">
-              <strong style="color:#ffc87a;">❌ {m["label"]}</strong>
-              <div style="color:#aa8866;font-size:0.85rem;margin-top:0.2rem;">
-                This clause was not found in the document and may expose a party to risk.
+            <div class="risk-card risk-border-medium">
+              <div class="rc-header">
+                <span class="rc-cat">{icon("alert_triangle", 15, "#fbbf24")} Missing: {m["label"]} Clause</span>
+                <span class="badge-medium">Attention Required</span>
               </div>
+              <div class="rc-desc">This clause is customarily expected in contracts of this type and is absent. Consider negotiating its addition to safeguard legal standing.</div>
             </div>""", unsafe_allow_html=True)

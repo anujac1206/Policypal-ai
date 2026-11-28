@@ -10,68 +10,13 @@ def _logo_base64() -> str:
         return ""
 
 def render_navbar():
-    # 1. Inject pure CSS to force Streamlit columns and page links to form a tight header row
-    st.markdown("""
-    <style>
-        /* Target the top row columns row container */
-        div[data-testid="stHorizontalBlock"] {
-            align-items: center !important;
-            padding-bottom: 12px !important;
-            margin-bottom: 1.5rem !important;
-        }
+    # Inject Material Icons and global Theme.css
+    st.markdown('<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">', unsafe_allow_html=True)
+    theme_file = Path(__file__).resolve().parent.parent / "styles" / "Theme.css"
+    if theme_file.exists():
+        st.markdown(f"<style>\n{theme_file.read_text(encoding='utf-8')}\n</style>", unsafe_allow_html=True)
 
-
-        /* Logo Brand Container layout styling */
-        .navbar-brand {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-        }
-        .navbar-brand img {
-            width: 44px;
-            height: 44px;
-            object-fit: contain;
-        }
-        .navbar-brand span {
-            font-size: 20px;
-            font-weight: 600;
-            color: #ffffff;
-            white-space: nowrap;
-        }
-        .block-container {
-            padding-top: 2rem !important;
-        }
-
-        /* Strip native Streamlit buttons into minimal aesthetic text links */
-        div[data-testid="stPageLink-Container"] a {
-            background-color: transparent !important;
-            color: #b3b3b3 !important;
-            border: none !important;
-            font-size: 16px !important;
-            font-weight: 500 !important;
-            padding: 0 0 4px 0 !important;
-            text-decoration: none !important;
-            transition: color 0.15s ease;
-            box-shadow: none !important;
-            border-bottom: 2px solid transparent !important;
-            border-radius: 0px !important;
-        }
-        
-        /* Link hover state styling */
-        div[data-testid="stPageLink-Container"] a:hover {
-            color: #ffffff !important;
-            background-color: transparent !important;
-        }
-
-        /* Dynamic white underline active highlight */
-        div[data-testid="stPageLink-Container"] a[aria-current="page"] {
-            color: #ffffff !important;
-            border-bottom: 2px solid #ffffff !important;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # 2. Use Streamlit columns safely, letting CSS collapse the space between them
+    # Use Streamlit columns for navbar layout
     col_brand, spacer1, col_l1, col_l2, col_l3, col_l4, col_l5, col_l6, spacer2 = st.columns(
         [4, 1, 1, 1.4, 1.4, 1.5, 1.5, 1, 2]
     )
