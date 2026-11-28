@@ -131,6 +131,8 @@ def analyze_document(file_path: str, question: str, analysis_type: str = "Full A
         clauses=member3_input,
         question=resolved_question,
         include_llm=include_llm,
+        structured_contract=structured_contract,
+        contract_text=contract_text,
     )
 
     metadata = {
